@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  become: no
+  vars:
+    docker_images:
+      "image-2":
+        depends_on: ["image-1"]
+      "image-3":
+        depends_on: ["image-2"]
+      "image-4":
+        depends_on: ["image-1", "image-3"]
+      "image-standalone-1":
+      "image-standalone-2":
+        depends_on: []
+  tasks:
+    - set_fact:
+        image_list: '{{ docker_images | topological_sort("depends_on") }}'
