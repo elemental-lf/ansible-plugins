@@ -3,7 +3,7 @@
   become: no
   tasks:
     - debug: msg="cmd {{ item.cmd }}, start_line {{ item.start_line }}"
-      with_dockerfile_search:
+      with_dockerfile:
         - |
           FROM scratch AS build
 
@@ -13,6 +13,18 @@
           COPY vhost.conf /etc/httpd/conf.d/vhost.conf
         - ['FROM']
     - debug: msg="cmd {{ item.cmd }}, start_line {{ item.start_line }}"
-      with_dockerfile_search:
+      with_dockerfile:
+        - |
+          FROM scratch AS build
+
+          FROM bla/centos7-apache-php AS runtime
+          
+          COPY vhost/ /var/www/vhost/
+          COPY vhost.conf /etc/httpd/conf.d/vhost.conf
+      when: item.cmd == 'from'
+      loop_control:
+        label: "{{ item.cmd }}"
+    - debug: msg="cmd {{ item.cmd }}, start_line {{ item.start_line }}"
+      with_dockerfile:
         - "{{ lookup('file', 'Dockerfile') }}"
-        - ['FROM']
+        - ['FROM', 'COPY']

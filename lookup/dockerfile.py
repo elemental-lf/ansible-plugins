@@ -26,12 +26,13 @@ class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
         if not HAS_DOCKERFILE:
             raise errors.AnsibleError('dockerfile module is missing')
-            
-        terms[1] = listify_lookup_plugin_terms(terms[1], templar=self._templar, loader=self._loader)
-        terms[1] = map(lambda cmd: unicode(cmd.lower()), terms[1])
 
-        if not isinstance(terms, list) or not len(terms) == 2:
-            raise errores.AnsibleError('dockerfile_search lookup expect a list of two items');
+        if len(terms) == 2:  
+            terms[1] = listify_lookup_plugin_terms(terms[1], templar=self._templar, loader=self._loader)
+            terms[1] = map(lambda cmd: unicode(cmd.lower()), terms[1])
+
+        if not isinstance(terms, list) or not 1 <= len(terms) <= 2:
+            raise errores.AnsibleError('dockerfile lookup expects a list of one or two items');
 
         try:
             df = dockerfile.parse_string(unicode(terms[0]))
@@ -41,4 +42,7 @@ class LookupModule(LookupBase):
             else:
                 raise_from( errors.AnsibleError("Dockerfile couldn't be parsed"), e)
 
-        return [command._asdict() for command in df if command.cmd in terms[1]]
+        if len(terms) == 2:  
+            return [command._asdict() for command in df if command.cmd in terms[1]]
+        else:
+            return map(lambda command: command._asdict(), df)
