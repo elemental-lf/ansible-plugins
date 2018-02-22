@@ -42,7 +42,4 @@ class LookupModule(LookupBase):
             else:
                 raise_from( errors.AnsibleError("Dockerfile couldn't be parsed"), e)
 
-        if len(terms) == 2:  
-            return [command._asdict() for command in df if command.cmd in terms[1]]
-        else:
-            return map(lambda command: command._asdict(), df)
+        return [command._asdict() for command in df if len(terms) == 1 or command.cmd in terms[1]]
